@@ -72,4 +72,9 @@ class Comentrate(db.Model):
     comment = db.Column(db.Text,nullable = True)
     usermodel_id = db.Column(db.Integer,db.ForeignKey("user_model.id"))
     recipe_id = db.Column(db.Integer,db.ForeignKey("recipe.id"))
+    def __init__(self,rate,comment,usermodel_id,recipe_id) -> None:
+        self.rate = rate
+        self.comment = comment
+        self.usermodel_id = usermodel_id
+        self.recipe_id = recipe_id
 

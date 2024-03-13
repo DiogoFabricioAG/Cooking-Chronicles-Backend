@@ -21,6 +21,7 @@ migrate = Migrate(app, db)
 
 ROUTE_USERS = "/api/user/"
 ROUTE_RECIPES = "/api/recipes/"
+ROUTE_COMMENTARY = "/api/comment/"
 # ------------------------------------------------- 
 @app.route('/api/user/<int:user_id>/image', methods=['GET'])
 def get_user_image(user_id):
@@ -54,16 +55,25 @@ def index():
     all_users =  UserModel.query.all()
     print(all_users)
     return UserSchema(many=True).jsonify(all_users)
+
 @app.route(ROUTE_RECIPES,methods=["GET"])
 @cross_origin()
 def recipes():
     all_recipes =  Recipe.query.all()
     return RecipeSchema(many=True).dump(all_recipes)
+
 @app.route(f"{ROUTE_RECIPES}best/<int:id>",methods=["GET"])
 @cross_origin()
 def bestrecipes(id):
     my_best_recipes =  Recipe.query.filter_by(user_model_id = id)[0:3]
     return RecipeSchema(many=True).dump(my_best_recipes)
+
+@app.route(f"{ROUTE_RECIPES}<int:id>",methods=["GET"])
+@cross_origin()
+def recipe(id):
+    recipe =  Recipe.query.filter_by(id = id).first()
+    return RecipeSchema().dump(recipe)
+
 @app.route(f"{ROUTE_USERS}<int:id>",methods=["GET"])
 @cross_origin()
 def userbyid(id):
@@ -108,4 +118,17 @@ def loginuser():
     else:
         return "Usuario no encontrado", 404
 
+@app.route(f"{ROUTE_COMMENTARY}<int:id>",methods=["GET"])
+@cross_origin()
+def comments(id):
+    comments = Comentrate.query.filter_by(recipe_id = id)
+    return CommentSchema(many=True).jsonify(comments)
 
+@app.route(f"{ROUTE_COMMENTARY}create/<int:id>/",methods=["POST"])
+@cross_origin()
+def createcomment(id):
+    recipe = Recipe.query.filter_by(id=id).first()
+    comment = Comentrate(rate=request.json["rate"],comment=request.json["comment"],usermodel_id=request.json["usermodel_id"],recipe_id=recipe.id)
+    db.session.add(comment)
+    db.session.commit()
+    return CommentSchema().jsonify(comment)
